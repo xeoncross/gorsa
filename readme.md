@@ -1,7 +1,7 @@
-# gorsa
+# GoRSA
 
 A collection of RSA public/private key encryption helpers. These make working
-with RSA keys easier. See the [example for usage](https://github.com/Xeoncross/gorsa/blob/master/example/main.go).
+with RSA keys easier.
 
 - https://golang.org/pkg/crypto/x509
 - https://golang.org/pkg/crypto/rsa/
@@ -9,12 +9,21 @@ with RSA keys easier. See the [example for usage](https://github.com/Xeoncross/g
 - https://github.com/cloudflare/cfssl/
 
 
-## Example
+## Simple Example
 
+    package main
+
+    import (
+    	"crypto/rand"
+    	"crypto/rsa"
+    	"log"
+
+    	"github.com/xeoncross/go-rsa"
+    )
 
     func main() {
 
-      // Create RSA key
+    	// Create RSA key
     	key, err := rsa.GenerateKey(rand.Reader, 2048)
     	if err != nil {
     		log.Fatal(err)
@@ -26,10 +35,12 @@ with RSA keys easier. See the [example for usage](https://github.com/Xeoncross/g
     		log.Fatal(err)
     	}
 
-      // Save public key
+    	// Save public key
     	err = gorsa.SavePublicKey("public.pem", key.PublicKey)
     	if err != nil {
     		log.Fatal(err)
     	}
 
     }
+
+For a complete demo see [the example for directory](https://github.com/Xeoncross/gorsa/blob/master/example/main.go).
