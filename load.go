@@ -11,10 +11,6 @@ import (
 	"io/ioutil"
 )
 
-/*
- * Collection of Go helpers for working with RSA keys in multiple formats.
- */
-
 // LoadPublicKey from a PEM encoded private (or public) key
 func LoadPublicKey(pembytes []byte, password string) (pubkey rsa.PublicKey, err error) {
 	pembytes = bytes.TrimSpace(pembytes)
@@ -93,21 +89,4 @@ func LoadPublicKeyFromFile(filename string, password string) (pubkey rsa.PublicK
 	b = bytes.TrimSpace(b)
 
 	return LoadPublicKey(b, password)
-}
-
-// DecryptPEMBlock using password (SSH keys are often encrypted)
-func DecryptPEMBlock(block *pem.Block, password string) (out *pem.Block, err error) {
-
-	if password == "" {
-		err = errors.New("No password provided for encrypted PEM file")
-		return
-	}
-
-	var der []byte
-	der, err = x509.DecryptPEMBlock(block, []byte(password))
-	if err != nil {
-		return
-	}
-
-	return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: der}, nil
 }
