@@ -6,11 +6,17 @@ import (
 	"crypto/x509"
 	"encoding/asn1"
 	"encoding/pem"
+	"errors"
 	"io/ioutil"
 )
 
+// SavePublicKey to filename
+func SavePublicKey(fileName string, key rsa.PublicKey) (err error) {
+	return SavePKIXPublicKey(fileName, key)
+}
+
 // SavePKIXPublicKey to the given fileName
-func SavePKIXPublicKey(fileName string, key *rsa.PublicKey) (err error) {
+func SavePKIXPublicKey(fileName string, key rsa.PublicKey) (err error) {
 	var b []byte
 	b, err = x509.MarshalPKIXPublicKey(&key)
 	if err != nil {
@@ -22,12 +28,12 @@ func SavePKIXPublicKey(fileName string, key *rsa.PublicKey) (err error) {
 		Bytes: b,
 	}
 
-	err = ioutil.WriteFile(fileName, pem.EncodeToMemory(block), 0600)
+	err = ioutil.WriteFile(fileName, pem.EncodeToMemory(block), 0644)
 	return
 }
 
 // SaveASN1PublicKey to the given fileName
-func SaveASN1PublicKey(fileName string, key *rsa.PublicKey) (err error) {
+func SaveASN1PublicKey(fileName string, key rsa.PublicKey) (err error) {
 	var b []byte
 	b, err = asn1.Marshal(key)
 	if err != nil {
@@ -39,16 +45,21 @@ func SaveASN1PublicKey(fileName string, key *rsa.PublicKey) (err error) {
 		Bytes: b,
 	}
 
-	err = ioutil.WriteFile(fileName, pem.EncodeToMemory(block), 0600)
+	err = ioutil.WriteFile(fileName, pem.EncodeToMemory(block), 0644)
 	return
 }
 
+// SavePrivateKey to filename
+func SavePrivateKey(fileName string, key rsa.PrivateKey, password string) (err error) {
+	return SavePKCS1PrivateKey(fileName, key, password)
+}
+
 // SavePKCS1PrivateKey to the given filepath
-func SavePKCS1PrivateKey(fileName string, key *rsa.PrivateKey, password string) (err error) {
+func SavePKCS1PrivateKey(fileName string, key rsa.PrivateKey, password string) (err error) {
 
 	var block = &pem.Block{
 		Type:  "PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(key),
+		Bytes: x509.MarshalPKCS1PrivateKey(&key),
 	}
 
 	// Encrypt the PEM?
@@ -66,7 +77,11 @@ func SavePKCS1PrivateKey(fileName string, key *rsa.PrivateKey, password string) 
 // SavePKCS8PrivateKey to the given filepath
 // Go doesn't support PKCS#8 natively
 // TODO fix this
-func SavePKCS8PrivateKey(fileName string, key *rsa.PrivateKey, password string) (err error) {
+func SavePKCS8PrivateKey(fileName string, key rsa.PrivateKey, password string) (err error) {
+
+	if true {
+		return errors.New("PKCS#8 support not finished yet")
+	}
 
 	pkcs8Key := struct {
 		Version             int
@@ -74,7 +89,7 @@ func SavePKCS8PrivateKey(fileName string, key *rsa.PrivateKey, password string) 
 		PrivateKey          []byte
 	}{
 		Version:    0,
-		PrivateKey: x509.MarshalPKCS1PrivateKey(key),
+		PrivateKey: x509.MarshalPKCS1PrivateKey(&key),
 	}
 
 	pkcs8Key.PrivateKeyAlgorithm = make([]asn1.ObjectIdentifier, 1)

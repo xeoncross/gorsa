@@ -16,7 +16,7 @@ import (
  */
 
 // LoadPublicKey from a PEM encoded private (or public) key
-func LoadPublicKey(pembytes []byte, password []byte) (pubkey rsa.PublicKey, err error) {
+func LoadPublicKey(pembytes []byte, password string) (pubkey rsa.PublicKey, err error) {
 	pembytes = bytes.TrimSpace(pembytes)
 
 	var block *pem.Block
@@ -86,7 +86,7 @@ func LoadPublicKey(pembytes []byte, password []byte) (pubkey rsa.PublicKey, err 
 }
 
 // LoadPublicKeyFromFile given (expecting PEM format)
-func LoadPublicKeyFromFile(filename string, password []byte) (pubkey rsa.PublicKey, err error) {
+func LoadPublicKeyFromFile(filename string, password string) (pubkey rsa.PublicKey, err error) {
 	var b []byte
 	b, err = ioutil.ReadFile(filename)
 
@@ -96,15 +96,15 @@ func LoadPublicKeyFromFile(filename string, password []byte) (pubkey rsa.PublicK
 }
 
 // DecryptPEMBlock using password (SSH keys are often encrypted)
-func DecryptPEMBlock(block *pem.Block, password []byte) (out *pem.Block, err error) {
+func DecryptPEMBlock(block *pem.Block, password string) (out *pem.Block, err error) {
 
-	if len(password) == 0 {
+	if password == "" {
 		err = errors.New("No password provided for encrypted PEM file")
 		return
 	}
 
 	var der []byte
-	der, err = x509.DecryptPEMBlock(block, password)
+	der, err = x509.DecryptPEMBlock(block, []byte(password))
 	if err != nil {
 		return
 	}
