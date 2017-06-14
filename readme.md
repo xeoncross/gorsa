@@ -8,6 +8,9 @@ with RSA keys easier.
 - https://golang.org/pkg/encoding/pem/
 - https://github.com/cloudflare/cfssl/
 
+# Install
+
+    go get github.com/Xeoncross/gorsa
 
 ## Simple Example
 
@@ -18,7 +21,7 @@ with RSA keys easier.
     	"crypto/rsa"
     	"log"
 
-    	"github.com/xeoncross/go-rsa"
+    	"github.com/xeoncross/gorsa"
     )
 
     func main() {
@@ -43,4 +46,4 @@ with RSA keys easier.
 
     }
 
-For a complete demo see [the example for directory](https://github.com/Xeoncross/gorsa/blob/master/example/main.go).
+For a complete demo, see [the example directory](https://github.com/Xeoncross/gorsa/blob/master/example/main.go).
