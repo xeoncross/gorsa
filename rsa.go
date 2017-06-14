@@ -72,8 +72,9 @@ func LoadPublicKey(pembytes []byte, password []byte) (pubkey rsa.PublicKey, err 
 			pubkey = *k
 		case *rsa.PrivateKey:
 			pubkey = k.PublicKey
-		// case *dsa.PublicKey: // todo
-		// case *ecdsa.PublicKey: // todo
+		// This also works with DSA and ECDSA
+		// case *dsa.PublicKey:
+		// case *ecdsa.PublicKey:
 		default:
 			err = fmt.Errorf("Unsupported key type %T", generalKey)
 		}
@@ -110,25 +111,3 @@ func DecryptPEMBlock(block *pem.Block, password []byte) (out *pem.Block, err err
 
 	return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: der}, nil
 }
-
-// // DecryptPEM if encrypted (SSH keys are often encrypted)
-// func DecryptPEM(key []byte, password []byte) (out []byte, err error) {
-// 	var block *pem.Block
-// 	block, _ = pem.Decode(key)
-//
-// 	if x509.IsEncryptedPEMBlock(block) {
-// 		if len(password) == 0 {
-// 			err = errors.New("No password provided for encrypted PEM file")
-// 			return
-// 		}
-//
-// 		var der []byte
-// 		der, err = x509.DecryptPEMBlock(block, password)
-// 		if err != nil {
-// 			return
-// 		}
-// 		key = pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: der})
-// 	}
-//
-// 	return key, nil
-// }
