@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/asn1"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -11,7 +12,7 @@ import (
 )
 
 /*
- * Collection of Go helpers for working with RSA keys
+ * Collection of Go helpers for working with RSA keys in multiple formats.
  */
 
 // LoadPublicKey from a PEM encoded private (or public) key
@@ -28,14 +29,17 @@ func LoadPublicKey(pembytes []byte, password []byte) (pubkey rsa.PublicKey, err 
 	// Often needed for encrypted keys (i.e. SSH keys)
 	if x509.IsEncryptedPEMBlock(block) {
 		block, err = DecryptPEMBlock(block, password)
+		if err != nil {
+			err = errors.New("Error decrypting PEM block: " + err.Error())
+			return
+		}
 	}
-
-	switch block.Type {
 
 	// "BEGIN RSA (PUBLIC|PRIVATE) KEY" is PKCS#1, which can only contain RSA keys.
 	// "BEGIN (PUBLIC|PRIVATE) KEY" is PKCS#8, which can contain a variety of formats.
 	// "BEGIN ENCRYPTED PRIVATE KEY" is encrypted PKCS#8.
 
+	switch block.Type {
 	case "PUBLIC KEY", "PRIVATE KEY",
 		"ENCRYPTED PRIVATE KEY",
 		"RSA PUBLIC KEY", "RSA PRIVATE KEY":
@@ -48,24 +52,33 @@ func LoadPublicKey(pembytes []byte, password []byte) (pubkey rsa.PublicKey, err 
 			if err != nil {
 				generalKey, err = x509.ParsePKCS8PrivateKey(block.Bytes)
 				if err != nil {
-					return
+					// Must be an older system that made this key...
+					var x rsa.PublicKey
+					_, err = asn1.Unmarshal(block.Bytes, &x)
+
+					// uncle
+					if err != nil {
+						return
+					}
+
+					generalKey = &x
 				}
 			}
 		}
 
 		// We only support RSA keys
-		switch generalKey := generalKey.(type) {
+		switch k := generalKey.(type) {
 		case *rsa.PublicKey:
-			pubkey = *generalKey
+			pubkey = *k
 		case *rsa.PrivateKey:
-			pubkey = generalKey.PublicKey
+			pubkey = k.PublicKey
 		// case *dsa.PublicKey: // todo
 		// case *ecdsa.PublicKey: // todo
 		default:
 			err = fmt.Errorf("Unsupported key type %T", generalKey)
 		}
 	default:
-		err = fmt.Errorf("Unsupported key type %q", block.Type)
+		err = fmt.Errorf("Unsupported PEM block type %q", block.Type)
 	}
 
 	return
