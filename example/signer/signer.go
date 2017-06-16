@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/xeoncross/go-rsa"
+	"github.com/xeoncross/gorsa"
 )
 
 // SigningServer is a simple HTTP client + signing server.

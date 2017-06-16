@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/xeoncross/go-rsa"
+	"github.com/xeoncross/gorsa"
 )
 
 /*
